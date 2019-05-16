@@ -1,4 +1,5 @@
 module.exports = {
+  base: 'readings',
   title: 'cybaj IT {책, 레퍼런스} 읽기',
   description: '[networkx, ]',
   markdown: {
@@ -8,9 +9,9 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'About', link: '/about/' },
-      { text: 'READINGs',
+      { text: 'read Reference',
         items: [
-          { text: 'networkx', link: '/readings/networkx/' }
+          { text: 'networkx', link: '/references/networkx/' }
         ]
       }
     ]
