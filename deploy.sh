@@ -20,7 +20,7 @@ git commit -m 'deploy'
 # git push -f git@github.com:cybaj/cybaj.github.io.git master
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:cybaj/readings.git master:gh-pages
+git push -f git@github.com:cybaj/reading.git master:gh-pages
 
 cd -
 

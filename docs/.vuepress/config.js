@@ -1,5 +1,5 @@
 module.exports = {
-  base: 'readings',
+  base: '/reading/',
   title: 'cybaj IT {책, 레퍼런스} 읽기',
   description: '[networkx, ]',
   markdown: {
