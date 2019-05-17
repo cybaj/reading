@@ -1,7 +1,6 @@
 {
   "name": "cybaj.github.io",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "docs:dev": "vuepress dev docs",
@@ -12,5 +11,17 @@
   "license": "ISC",
   "dependencies": {
     "vuepress": "^0.14.11"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cybaj/reading.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cybaj/reading/issues"
+  },
+  "homepage": "https://github.com/cybaj/reading#readme",
+  "description": ""
 }
