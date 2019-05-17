@@ -1,5 +1,5 @@
 ---
-title:C로 배우는 쉬운 자료구조
+title: C로 배우는 쉬운 자료구조
 description: 이지영 지음 한빛아카데미
 sidebar: auto
 lang: ko-KR
