@@ -1,7 +1,7 @@
 module.exports = {
   base: '/reading/',
   title: 'cybaj IT {책, 레퍼런스} 읽기',
-  description: '[networkx, ]',
+  description: '[networkx, clang DS,]',
   markdown: {
     lineNumbers: true
   },
@@ -12,6 +12,11 @@ module.exports = {
       { text: 'read Reference',
         items: [
           { text: 'networkx', link: '/references/networkx/' }
+        ]
+      },
+      { text: 'read Book',
+        items: [
+          { text: 'clang DS', link: '/books/c_datastructure/' }
         ]
       }
     ]
