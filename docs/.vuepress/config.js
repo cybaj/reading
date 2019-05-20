@@ -16,7 +16,8 @@ module.exports = {
       },
       { text: 'read Book',
         items: [
-          { text: 'clang DS', link: '/books/c_datastructure/' }
+          { text: 'clang DS', link: '/books/c_datastructure/' },
+          { text: 'js Patterns', link: '/books/js_patterns/' }
         ]
       }
     ]
