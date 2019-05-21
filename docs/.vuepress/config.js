@@ -11,7 +11,8 @@ module.exports = {
       { text: 'About', link: '/about/' },
       { text: 'read Reference',
         items: [
-          { text: 'networkx', link: '/references/networkx/' }
+          { text: 'networkx', link: '/references/networkx/' },
+          { text: 'd3.js', link: '/references/d3_js/' },
         ]
       },
       { text: 'read Book',
