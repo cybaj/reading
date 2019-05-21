@@ -480,13 +480,400 @@ MYAPP.utilities.module = (function (app, global) {
 ### 샌드박스 패턴
 
 모듈 패턴은 너무 좋아보인다.  
+그런데 샌드박스 패턴이라니, 뭐지.  
 샌드박스 패턴은 왜 나올까?  
 
 하나의 네임스페이스를 갖는 패턴은 다음과 같은 단점을 갖는다.
 - 단 하나의 전역변수에 의존한다. 따라서 동일한 애플리케이션, 라이브러리의 두가지 버전을 한 페이지에서 실행시키는 것이 불가능
 - MYAPP.utilities.array 와 같이 점으로 연결된 긴 이름을 써야 함. 런타임에 그만큼의 탐색 작업이 필요함.
 
+그렇다면 샌드박스 패턴이란 게 뭘까 일단  
 > 어떤 모듈이 다른 모듈과 그 모듈의 샌드박스에 영향을 미치지 않고 동작할 수 있는 환경을 제공한다. (p.120)
 
 #### 전역 생성자
+
+기존 *네임스페이스 패턴*에서는 글로벌은 `MYAPP` 같은 것으로써, 하나만 있게 된다.  
+*샌드박스 패턴*에서는 생성자가 유일한 글로벌이다.  
+
+일단 `MYAPP` 같은 네임스페이스를 역할을 하는 `box`를 받아 어느 스코프 안에서 처리하는 게 하는 것이다. 
+```javascript
+new Sandbox(function (box) {
+    // 여기에 코드들
+});
+```
+이렇게 네임스페이스를 받는 함수로 묶으면 될 것이고,  
+그 함수를 샌드박스 생성자에 전달한다.
+(샌드박스 생성자는 유일한 글로벌이다.)
+
+여기에 두가지 부분을 추가하고자 한다고 한다.
+- new를 강제하는 패턴을 넣어, new 없이 사용할 수 있게 함.
+- Sandbox를 통해 모듈로 구현된 필요한 처리들을 모아 제공하고자 할 것이고, Sandbox() 생성자가 필요한 그 모듈 이름에 대한 정보를 받을 수 있는 선택적인 인자를 만든다.  
+
+이중 앞에 것, new를 강제하는 패턴은 아래와 같다.
+```javascript
+function Waffle() {
+    // 아래 조건문은 "현재 실행되는 함수(callee)가 this와 같다면" 그러니까, this는 그 매핑 규칙에 의해, 함수를 호출한 것이 될 수 있고, new에 의해 되었다면 스스로일 수 있기 때문에, 결국 "new 에 의해 함수가 실행됐다면"
+    if (!(this instanceof arguments.callee)) {
+        return new arguments.callee()
+    }
+}
+
+// p.58
+// 이 코드의 callee는 ES 5의 Strict Mode에서는 동작 안함. 따라서 이것을 위의 경우 'Waffle'로 명시해주어 이용한다.
+```
+
+그렇다. 우린 갖고 있는 모듈들로 기능을 제공하고자 하고, 해당 기능 로직을 콜백함수로 샌드박스 내부 환경에 격리시킬 것이다. 필요한 모듈 이름을 전달할 것이다. 바람직한 동작을 막기 위해 new를 강제하는 패턴을 둘 것이다.
+```javascript
+Sandbox(['ajax', 'event'], function (box) {
+    // console.log(box);
+})
+
+// p.121
+```
+sandbox 를 통한 구현 안에 또 다른 sandbox를 두더라도, 둘의 scope는 간섭이 없다.
+```javascript
+Sandbox('dom', 'event', function (box) {
+    /*
+        dom 과 event를 가지고 작업하는 코드
+    */
+    Sandbox('ajax', function (box) {
+        // 여기에 box 는 위 box 와 격리
+        /*
+            ajax 를 가지고 작업하는 코드
+        */
+    })
+
+    // 더이상 ajax에 관련된 내용 없음
+})
+
+// p.122
+```
+- 원하는 유형별로 모듈의 인스턴스를 여러개 만들 수 있다.
+- 필요하다면 함수는 곧 객체이기 때문에 Sandbox() 생성자의 '스태틱' 프로퍼티에 데이터 저장.
+- 콜백함수로 코드를 감싸, 전역 네임스페이스를 보호.
+
+#### 모듈 추가하기
+
+자, 여태까지는 Sandbox를 어떻게 사용할 것이냐에 대한 내용이었다. 그러니까 모듈을 갖다가 어떻게 쓸 것이냐에 대한 내용이었다.  
+이제 갖다 쓸 모듈들을 어떻게 갖다 쓸 수 있게 Sandbox에 달아두겠느냐.
+
+```javascript
+Sandbox.modules = {};
+
+// dom 이란 모듈을 app 객체에 해당 로직을 달게 만든다.
+Sandbox.modules.dom = function (box) {
+    box.getElement = function () {}
+    box.getStyle = function () {}
+    box.foo = "bar"
+}
+
+// event 모듈도 app 객체에 달리게 하자.
+Sandbox.modules.event = function (box) {
+    box.attachEvent = function () {};
+    box.detachEvent = function () {};
+    //필요에 따라서 Sandbox 프로토타입에 접근도 할 수 있다.
+    // box.constructor.prototype.m = "mmm"
+}
+
+
+// ajax 모듈도 app 객체 달자.
+Sandbox.modules.ajax = function (box) {
+    box.makeRequest = function () {};
+    box.getResponse = function () {};
+}
+
+// p.123
+```
+
+#### 생성자 구현
+
+사용할 modules을 다는 방법도 배웠고, Sandbox를 사용하는 것도 배웠으니 (`Sandbox('ajax', function(box) { // ... })`)  
+이제 이 Sandbox 생성자를 어떻게 만들 것이냐를 배우자.  
+
+```javascript
+function Sandbox() {
+    // arguments => 배열
+    var args = Array.prototype.slice.call(arguments),
+    // Sandbox 의 사용
+    // Sandbox('dom', 'event', function (box) { // ... } )
+    // 마지막 인자는 처리 내용이 담긴 콜백함수 이므로
+        callback = args.pop(),
+        modules = (args[0] && typeof args[0] === "string") ? args : args[0],
+        i;
+
+    // 함수가 생성자로 호출되도록 보장한다.
+    if (!(this instanceof Sandbox)) {
+        return new Sandbox(modules, callback);
+    }
+
+    // this에 필요한 프로퍼티들을 추가한다.
+    this.a = 1
+    this.b = 2
+
+    // 코어 'this' 객체에 모듈을 추가한다
+    // 모듈이 없거나 "*" 이면 사용 가능한 모든 모듈을 사용한다는 의미다.
+    if (!modules || modules === '*' || modules[0] === '*') {
+        modules = [];
+        for (i in Sandbox.modules) {
+            if (Sandbox.modules.hasOwnProperty(i)) {
+                modules.push(i);
+            }
+        }
+    }
+
+    // 필요한 모듈들을 초기화한다. 그러니까 this (app 객체가 될 것)에 모듈 로직을 달자.
+    for (i = 0; i < modules.length; i += 1) {
+        Sandbox.modules[modules[i]](this);
+    }
+
+    // 콜백 함수를 호출한다. 모듈을 달고 있는, 초기화된 app 객체를 이제 그 모듈들을 활용한 처리하는 격리된 부분인 콜백함수에 전달해 호출한다.
+    callback(this)
+}
+```
+결국 하려는 것은 어떤 모듈처리를 활용한 처리를 하고 싶은 것이고,  
+필요로 하는 모듈이 달려 있는 app 객체를, 활용하는 로직이 담겨있을, 격리되어 있는 콜백 함수에 전달해 호출한다.  
+
+이렇게 모듈로 제공된 기존의 처리를 활용한 처리를 할 수 있는  
+공간을 제공하는데, 그것이 격리되어 있어 좋은 것.  
+
+앞서 배운 모듈을 정의하는 방법으로써 __모듈 패턴__과 그 모듈을 활용하는 인터페이스 층을 만드는 방법으로 __샌드박스 패턴__을 이해하게 되었다.  
+콜백함수 안에서 정의한 모듈을 맘대로 하여 쓴다.  
+
+다시 또 생각해보면, __모듈 패턴__ 역시 의존하고 있는 모듈을 가져와서 사용하고 있다. 그런데 모듈을 정의하는 방법으로써 __모듈 패턴__을 보게 된 것은, 아무래도 공개하고자 하는 API를 선택해 공개하는 것 때문인 거 같다. 
+
+모듈을 사용하는 입장에서 __모듈 패턴__ 과 __샌드박스 패턴__ 의 큰 차이는, 결국 콜백으로 처리로직을 감싸주는 것인 것으로 생각되었다. 사용하는 모듈은 그에 각각에 맞게 정의되어 있어야 할 것 같다.
+
+### 스태틱 멤버
+
+js에서 공개 스태틱 멤버, 비공개 스태틱 멤버를 구현하는 방법을 배워본다.
+
+#### 공개 스태틱 멤버
+
+```javascript
+// 생성자
+var Gadget = function () {}
+
+// 스태틱 메서드
+Gadget.isShiny = function () {
+    return "you bet"
+}
+
+// 프로토타입에 일반적인 함수를 추가.
+Gadget.prototype.setPrice = function (price) {
+    this.price = price;
+}
+
+// p.125
+```
+일반적인 함수는 prototype에.  
+스태틱 메서드는 생성자 멤버로.
+
+재밌는 것은 저렇게 정의한 스태틱 메서드는 인스턴스에 호출이 안된다는 것.  
+그래서 prototype에도 달아준다.
+
+```javascript
+var iphone = new Gadget();
+typeof iphone.isShiny; // "undefined"
+```
+```javascript
+Gadget.prototype.isShiny = Gadget.isShiny;
+iphoen.isShiny(); // "you bet"
+
+// p. 126
+```
+더 재미있는 것은, 스태틱 메서드를 "스태틱하지 않은 방식"으로 호출했을 때에 대해 조건을 둘 수 있다는 것.
+```javascript
+// 생성자
+var Gadget = function (price) {
+    this.price = price;
+}
+
+// 스태틱 메서드
+Gadget.isShiny = function () {
+
+    // 다음은 항상 동작한다.
+    var msg = "you bet";
+
+    // 다음은 스태틱하지 않은 방식으로, 그러니까 인스턴스에서 호출 되었을 때만 동작한다.
+    if (this instanceof Gadget) {
+        msg += ", it costs $" + this.price;
+    }
+
+    return msg;
+}
+
+// 프로토타입에 추가하는데, 이번에는 call을 이용해서. 여기서의 this는 인스턴스가 될 것.
+// call 없이 스태틱 메서드를 호출한다면, 그냥 msg = "you bet"이 되겠지.
+Gadget.prototype.isShiny = function () {
+    return Gadget.isShiny.call(this);
+}
+
+// p. 127
+```
+
+#### 비공개 스태틱 멤버
+
+비공개 스태틱 멤버란,
+- 동일한 생성자 함수로 생성된 객체들이 공유하는 멤버다.
+- 생성자 외부에서는 접근할 수 없다.
+
+prototype에 정의된 일반 함수와의 차이가 있다. 각 인스턴스가 갖는 함수가 아니라, 인스턴스들이 공유하는 함수다.
+
+```javascript
+var Gadget = (function () {
+
+    // 스태틱 변수/프로퍼티
+    var counter = 0
+
+    // 
+    return function () {
+        console.log(counter += 1);
+    }
+})()
+
+var g1 = new Gadget(); // 1이 출력된다.
+var g2 = new Gadget(); // 2이 출력된다.
+var g3 = new Gadget(); // 3이 출력된다.
+```
+closure 로 모든 instance가 동일한 counter 를 공유하고 있게 된다.  
+하나씩 늘어나고 있는데  
+객체의 유일성을 식별하는 ID로 쓸 수 있겠다.  
+쓸모가 많으니, 특권 메서드로 노출시키자.  
+앞서서 생성자로 쓸 함수객체를 return 문에 바로 선언해버리면, 인스턴스의 멤버함수를 prototype 으로 줄 수 없으니,  
+앞서 생성자로 쓸 함수객체를 선언하고, 이것의 prototype을 선언한다.  같은 함수 안에 정의 되어 있어 closure로 counter를 따오게 될 것.
+
+```javascript
+var Gadget = (function () {
+
+    var counter = 0
+        NewGadget;
+
+    NewGadget = function () {
+        counter += 1
+    }
+
+    NewGadget.prototype.getLastId = function () {
+        return counter
+    }
+
+    return NewGadget
+
+})();
+
+var iphone = new Gadget();
+iphone.getLastId();
+
+var ipod = new Gadget();
+ipod.getLastId();
+
+// p.129
+```
+
+이렇게 여러 인스턴스가 공유하는 값에 대한 스태틱 함수를 사용할 수 있게 되었다.  
+정말 편하고 중요한 것은 공유하고자 하는 값을 colsure 로 받을 수 있게 함수 안에서 선언해주고,  
+생성자 역할을 할 함수객체를 처리를 IIFE로 묶어 처리해 얻어내는 것.  
+이런 방법은 자주 쓰일 것이고, 편리하다.  
+모든 함수는 객체인 것이 중요하게 언급되는데, 난 모든 그것보다, (함수가 일급객체가 아닌 언어에서 생성자가 객체를 만들어내고 있었고) js에서 객체를 만들어내는 함수를, 또다른 함수를 통해 정해서 뱉을 수 있다는 것이 자연스러워야 겠다고 생각됐다.  
+
+### 객체 상수
+
+이제 const 를 쓰자.
+
+이전에는 비공개 프로퍼티를 만들고, setter 없이 getter 만 만드는 방법으로 만들었다고 한다.
+
+### 체이닝 패턴
+
+```javascript
+myobj.method1("hello").method2().method3("world").method4()
+```
+배우고 싶었던 패턴이다. 아마도 계속 처리 객체를 리턴하는 방식이겠다 생각을 했는데
+> 만약 메서드에 의미있는 반환 값이 존재하지 않는다면, 현재 작업중인 객체 인스턴스인 this를 반환하게 한다. 이렇게 하면 객체의 사용자는 앞선 메서드에 이어 다음 메서드를 바로 호출 할 수 있다. (p.132)
+
+```javascript
+var obj = {
+    value: 1,
+    increment: function () {
+        this.value += 1;
+        return this;
+    },
+    add: function (v) {
+        this.value += v;
+        return this;
+    },
+    shout: function () {
+        alert(this.value);
+    }
+}
+
+obj.increment().add(3).shout(); // 5
+
+// p.132
+```
+스스로를 반환하고 있다.  
+
+### method() 메서드
+
+> 재사용 가능한 메서드는 생성자의 prototype 프로퍼티에 추가되어야 한다. 그런데 prototype이란 것이 다른 개발자들에게는 낯선 개념일 수 있기 때문에, method()라는 메서드 속에 숨겨두는 것이다. ... 여기서는 method()라는 메서드를 'syntax sugar'로 ... ( p. 133 )
+
+쓰진 않겠지만, 구현 방법을 봐두면,
+```javascript
+if (typeof Function.prototype.method !== "function") {
+    Function.prototype.method = function (name, implementation) {
+        this.prototype[name] = implementation;
+        return this;
+    };
+}
+```
+Function의 프로토타입에 method를 붙이고, 모든 function에 붙을 것이고, 체이닝해서 
+```javascript
+var Person = function (name) {
+    this.name = name;
+}.
+method('getName', function () {
+    return this.name;
+}).
+method('setName', function (name) {
+    this.name = name;
+    return this;
+});
+```
+호출하고 있기 때문에, this는 생성자 함수 객체를 참조하여, prototype에 함수를 추가케 하고 있다.
+
+### 나름의 실전 문제
+이로써, 객체 생성패턴을 다 보았는데,  
+보면서 jquery-color plugin이 생각이 났다. 얼마전에 이를 vue의 어느 컴포넌트에서 갖다쓰고자 했을 때, 그 스크립트를 jQuery를 인자로 받는 함수로 싸고 그 함수를 export 하는 식으로 가져다 썼는데, 이렇게 쓸 수 있었던 것은 jquery-color 스크립트가 jQuery 라는 네임스페이스를 동일하게 사용하여 뭔가 처리를 하고 뭔가를 추가하고 있었기 때문이었다.  
+
+[jquery-color](https://github.com/jquery/jquery-color/blob/master/jquery.color.js) 에서, 필요 없을 거 같아 지워버렸던 앞 부분에 대해 이제 이해해보고 싶다. 내용은 AMD와 factory 패턴인 것 같다.
+```javascript
+/*!
+ * jQuery Color Animations v@VERSION
+ * https://github.com/jquery/jquery-color
+ *
+ * Copyright jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * Date: @DATE
+ */
+
+( function( root, factory ) {
+	if ( typeof define === "function" && define.amd ) {
+
+		// AMD. Register as an anonymous module.
+		define( [ "jquery" ], factory );
+	} else if ( typeof exports === "object" ) {
+		module.exports = factory( require( "jquery" ) );
+	} else {
+		factory( root.jQuery );
+	}
+} )( this, function( jQuery, undefined ) {
+
+	var stepHooks = "backgroundColor borderBottomColor borderLeftColor borderRightColor " +
+		"borderTopColor color columnRuleColor outlineColor textDecorationColor textEmphasisColor",
+
+	class2type = {},
+	toString = class2type.toString,
+
+    // ...
+```
 
