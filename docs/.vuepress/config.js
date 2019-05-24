@@ -11,7 +11,12 @@ module.exports = {
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'About', link: '/about/' },
+      { text: 'About', link: '/about/',
+        items: [
+          { text: 'notions', link: '/about/notions/' },
+          { text: 'recipes', link: '/about/recipes/' },
+        ]
+      },
       { text: 'read Reference',
         items: [
           { text: 'networkx', link: '/references/networkx/' },
