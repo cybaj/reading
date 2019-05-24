@@ -16,11 +16,11 @@ meta:
 각 요소에 대해 reference를 찾아보고, 흐름이 막히면 documents를 참조해서 읽어가자.
 전부 읽진 않고, force graph 를 편하게 쓸만큼 보면 되겠다.
 
-# Introduction (document)
+## Introduction (document)
 
 [introduction](https://d3js.org/#introduction) 을 보고서 정리한다. 기본적인 내용은 data를 DOM과 바인딩하여 움직인다는 것. d3 개념을 잡는 것은, data와 DOM이 어떻게 바인딩 되어있는지를 아는 것 같음.
 
-## Selections
+### Selections
 
 DOM API
 ```javascript
@@ -39,7 +39,7 @@ d3.selectAll("p").style("color", "blue");
 selector API를 통해 selections 구현했고.  
 이후 nodes를 mutating 하는 다양한 methods를 제공한다.
 
-## Dynamic Properties
+### Dynamic Properties
 
 mutating 한다 = properties가 동적으로 변한다
 ```javascript
@@ -55,7 +55,7 @@ d3.selectAll("p")
     .style("font-size", function(d) { return d + "px"; });
 ```
 
-## Enter and Exit
+### Enter and Exit
 
 이미 존재하는 데이터에 대해서는 .data() 체인을 통해서 추가했는데,  
 새로 들어오는 데이터에 대해 node 를 추가하거나, 필요없어진 node 를 삭제하는 것이 필요하다.
@@ -89,11 +89,11 @@ p.exit().remove();
 
 이렇게 나누어 처리함으로써, 또 transitions 에 대한 제어가 편해질 수 있다고 한다.
 
-## Transformation, not Representation
+### Transformation, not Representation
 
 d3는 processing 처럼 visual representation 을 새로 만들어 제공하는 것이 아니라 SVG, webGL 같은 웹 표준에 그릴 수 있게 처리해주는 것.
 
-## Transitions
+### Transitions
 
 styles, attributes의 변화를 쉽게 점진적으로 변하게 할 수 있다. 그 변화를 보간하는 일을 하는 녀석을 interpolator 라고 한다. 
 ```javascript
