@@ -100,3 +100,383 @@ meta:
 [TODO] 표1-10 시간 복잡도에 따른 알고리즘 수행 시간 비교 예 표 옮기기
 
 
+## 자료구조 구현을 위한 C 프로그래밍 기법
+
+### 배열
+
+배열은 스택에 할당되는 걸로 알고 있다.
+
+#### 1차원 배열
+
+##### 선언
+
+```c
+#include <stdio.h>
+
+void main() {
+  char c, c_array[100];
+  int i, i_array[100];
+  short s, s_array[100];
+  float f, f_array[100];
+  long l, l_array[100];
+
+  printf("\n char c = %d \t char c_array = %4d", sizeof(c), sizeof(c_array));
+  printf("\n int i = %d \t int i_array = %4d", sizeof(i), sizeof(i_array));
+  printf("\n short s = %d \t short s_array = %4d", sizeof(s), sizeof(s_array));
+  printf("\n float f = %d \t float f_array = %4d", sizeof(f), sizeof(f_array));
+  printf("\n long l = %d \t long l_array = %4d", sizeof(l), sizeof(l_array));
+
+}
+```
+
+##### 1차원 배열의 초기화
+
+```c
+
+int A[5] = {1,2,3,4,5};
+// or
+int A[] = {1,2,3,4,5};
+// or
+int A[5];
+A[0] = 1;
+A[1] = 2;
+A[2] = 3;
+A[3] = 4;
+A[4] = 5;
+```
+
+만약에 값을 명시 안하면 0이 들어감.
+```c
+int A[5] = {1,2,3}; //이면 [1][2][3][0][0] 꼴로 스택이 참.
+```
+
+##### 문자 배열
+
+둘의 차이는 종결문자인 '\0' (NULL 문자) 가 들어가느냐 마느냐.
+
+```c
+char s1[10] = "String"; // 끝에 널 들어감
+char s2[10] = { 'S', 't', 'r', 'i', 'n', 'g' }; // 끝에 널 안들어감
+```
+
+문자열 저장 하는 가장 기본 방법
+```c
+char s1[] = "String";
+```
+
+캐릭터 단위로 출력하기
+```c
+#include <stdio.h>
+
+void main() {
+  char str[20] = "Data Structure!";
+  int i;
+
+  // for 조건에 str[i] 가 들어감에 유의
+  for (i = 0; str[i]; i++) {
+    printf("%c", str[i]);
+  }
+}
+```
+
+#### 다차원 배열
+
+##### 선언
+자료형 배열이름 [행크기] [열크기]  
+이런 느낌
+
+물리적 구조가 `i[0][0] i[0][1] i[0][2] i[1][0] i[1][1] i[1][2] i[2][0] i[2][1] i[2][2]` 이런 식으로 되어있다고 한다.
+
+##### 다차원 배열의 초기화
+
+2차원 배열
+```c
+int i[2][3] = {{1,2,3}, {4,5,6}}; 
+// or
+int i[2][3] = {1,2,3,4,5,6}
+```
+이 경우에도 크기를 생략해줄 수 있는데, 이 경우 첫번째만.
+```c
+int i[][3] = {{1,2,3},{4,5,6}}; 
+// or
+int i[][3] = {1,2,3,4,5,6};
+```
+
+3차원 배열
+```c
+int i[2][3][4] = {{{1,2,3,4},{5,6,7,8},{9,10,11,12}},{{13,14,15,16},{17,18,19,20},{21,22,23,24}}};
+```
+
+##### 문자 다차원 배열
+
+```c
+char c[3][20] = { "Hong Gil Dong",
+                "Computer Department",
+                "Seoul Korea"};
+// or
+// 문자열 복사 string copy, strcpy
+char c[3][20];
+strcpy(c[0], "Hong Gil Dong");
+strcpy(c[1], "Computer Department");
+strcpy(c[2], "Seoul Korea");
+```
+
+### 포인터
+
+#### 포인터 개념
+
+```c
+int i;
+int *ptr = &i;
+```
+
+#### 포인터 선언
+
+포인터 자체 크기는 전부 2바이트.
+포인터에 자료형 쓰는데, 그 정보는 메모리를 찾아가고 그럴 때 사용하는듯 보인다.
+
+#### 포인터 연산
+
+##### 주소 연산자 &
+
+포인터 = &변수;
+
+##### 참조 연산자 *
+
+*포인터 = 값;
+변수 = *포인터;
+
+#### 포인터 초기화
+
+`int *ptr = 5;` 메모리 주소 중에 5번지가 있을 수도 있지만, 직접 입력하면 안된다.  
+메모리 주소는 컴파일 하면서 시스템이 정하는 작업이다.  
+
+주소를 지정하는 다섯가지 방법  
+1. 주소 연산자 &로 변수 주소 지정 
+```c
+int i;
+int *ptr = &i;
+```
+2. 동적 메모리 할당, 시작주소를 포인터값으로 지정
+동적 메모리를 할당하는 malloc() 함수  
+문자형 char 공간 100개를 할당하고  
+그 시작 주소를 포인터 ptr 에 지정한다.  
+```c
+char *ptr = (char *) malloc(100); 
+// 메모리를 100개 할당하는데, 그러니까 포인터가 될 것인데, 그것을 char * 캐스팅.
+```
+3. 문자형 포인터에 문자열 시작주소를 지정한다.
+```c
+char *ptr = "korea"; // 그러니까 문자열의 시작주소를 지정하는 것이다.
+```
+4. 배열 이름을 이용하여 배열 시작주소를 지정한다.
+```c
+char A[100];
+char *ptr = A; // 그러니까 배열의 시작주소를 지정하는 것이다.
+```
+5. 배열의 첫번째 요소의 주소르 ㄹ이용하여 배열 시작주소를 지정한다.
+```c
+char A[100];
+char *ptr = &A[0];
+```
+
+#### 포인터와 문자열
+
+```c
+char string1[20] = "Dreams come true!";
+char *ptr; 
+
+ptr = string1; // 배열 시작주소 복사
+
+// *ptr 은 'D'
+// *(ptr + 1) 은 'r'
+// *(ptr + 2) 는 'e'
+// ...
+
+```
+
+#### 포인터 배열
+
+"자료형 *" "포인터배열이름" "[배열크기]"
+
+```c
+int A[100]; // 4바이트 * 100 그러니까 "int" "A" "[100]"
+int *ptrs[100]; // 2바이트 * 100 그러니까 "int *" "ptrs" "[100]"
+```
+
+```c
+char string[3][10] = { "Dreams", "come", "true!" }; // 물리공간을 생각해보자
+char *ptr[3] = { { "Dreams" }, { "come" }, {"true!" } }; // 포인터가 3개. 각 포인터는 문자열의 시작주소를 갖지.
+```
+
+#### 포인터의 포인터 (이중포인터)
+
+"자료형 **" "포인터이름"
+
+```c
+char **ptr;
+// char 형 포인터를 가르키는 포인터
+```
+
+__이중포인터는 편의다.__
+sentence 로 다 다룰 수 있게 된다. 굳이 sentence 변수 썼다가 char 다룰 때, words 배열을 찾게 되는 불편함이 없이,  
+sentence 로 두번 갈 수 있게 한다.
+```c
+#include <stdio.h>
+
+void main() {
+  char **sent;
+  char *words[10];
+
+  words[0] = "Hello";
+  words[1] = " ";
+  words[2] = "World";
+
+  sent = words;
+  
+  printf("%s", *sent); // sent 에서 한번 가면 word 그래서 'Hello'
+  printf("%c", **sent); // sent 에서 두번 가면 char 그래서 'H'
+
+  printf("%s", *(sent+2)); // sent 에서 한번 가는 word 중에 3번째 그래서 'World'
+  printf("%c", *(*sent+1)); // sent 에서 두번 가면 char 중에 2번째 그래서 'e'
+}
+```
+
+### 구조체
+
+#### 구조체 개념
+
+배열 처럼 여러 데이터를 그룹으로 묶어 하나의 자료형으로 정의하고 사용하는 자료형
+
+#### 구조체 선언
+
+선언 형식
+```
+struct "구조체 형이름" {
+  자료형 항목1;
+  자료형 항목2;
+  ...
+  자료형 항목n;
+};
+```
+
+사용 형식
+```
+struct "구조체 형이름" "구조체변수이름"; // 구조체를 쓴다는 keyword 인 struct 쓰고, 구조체 type 써야할 거고, 변수 이름 써야 할 거고.
+```
+
+결국 구조체 형태를 정하는 것은,  
+그런 구조체 변수를 만들어 쓰고 싶은 것.
+3가지 방법
+
+1. 타입 선언 먼저 하고, 나중에 변수 선언
+```c
+struct employee {
+  char name[10];
+  int year;
+  int pay;
+};
+struct employee Lee;
+```
+
+2. 타입 선언과 동시에 변수 선언 (__가져다 쓸 타입도 있고, 그 타입으로 존재하는 구조체 변수도 있음__)
+```c
+struct employee {
+  char name[10];
+  int year;
+  int pay;
+} Lee;
+```
+
+3. 타입 이름 생략과 동시에 변수 선언 (__타입 이름이 없으니, 타입을 가져다 쓸 수 없고, 다만 그 타입으로 존재하는 구조체 변수가 있음__)
+```c
+struct {
+  char name[10];
+  int year;
+  int pay;
+} Lee;
+```
+
+#### 구조체 변수의 초기화
+
+```c
+struct employee {
+  char name[10];
+  int year;
+  int pay;
+};
+struct employee Lee = { "Ann", 2015, 4200 }; // 구조체 변수의 초기화
+```
+
+#### 데이터 항목의 참조
+
+구조체 연산자는 2개가 있다.  
+- 점 연산자 (.) : 변수에 대해
+- 화살표 연산자 (->) : 포인터에 대해
+
+##### 점 연산자
+```c
+struct employee Lee;
+Lee.name = "Ann"
+Lee.year = "2014;
+Lee.pay = 4200;
+```
+
+##### 화살표 연산자
+```c
+struct employee Kim;
+struct employee *sptr = &Kim;
+sptr->name = "susan";
+sptr->year = 2014;
+sptr->pay = 4300;
+
+//or
+(*sptr).name = "susan";
+(*sptr).year = 2014;
+(*sptr).pay = 4300;
+```
+
+#### 구조체 연산
+
+##### 데이터 항목 참조 연산
+```c
+struct employee Lee;
+struct employee *sptr;
+sptr = &Lee;
+Lee.year = 2015;
+sptr->pay = 3000;
+sptr->name = "Ann";
+```
+
+##### 구조체 변수 복사 연산
+일단 배열 `struct employee team[5];` 이 있다.  
+구조체 내 변수들을 함꺼번에 복사 가능
+
+```c
+struct employee Lee, Kim;
+Lee = Kim;
+Lee = team[2];
+team[2] = team[3];
+```
+
+##### 구조체 변수의 주소 구하기 연산
+```c
+struct employee Lee, team[5];
+struct employee *sptr1, *sptr2;
+
+sptr1 = &Lee;
+sptr2 = team;
+```
+
+### 재귀호출
+> 한 번에 해결할 수 없는 현재 작업을 한 단계 작게 분할한 하위 작업에 대해 재귀호출하는 과정을 반복하다 보면, 한 번에 해결하 ㄹ수 있을 정도로 분할된 작업 단위가 충분히 작아지는 단계를 만나게 되는데, 이 단계를 **베이스케이스 base case** 라고 한다. **베이스케이스** 에서 구한 답을 재귀호출자에 반환하는 과정이 재귀호출의 역순으로 반복되아ㅓ 결국 처음 문제에 대한 답을 구하게 되는 것이 재귀호출을 이용한 문제 해결의 원리이다.
+
+#### 재귀호출에 대한 내 생각  
+가장 단순한 경우에 대해 답을 구하는 과정을 만들어보고,  
+가장 단순한 경우를 베이스케이스로 볼 수 있는가를 따진다.  
+베이스케이스로서 갖는 값, 형태 같은 것을 찾아낸다. (하노이탑 문제의 원반개수 같은 것)
+그것을 중심으로 재귀적인 호출을 만들어낸다.  
+
+마치 뒤에서부터 풀어가는 것처럼 재귀호출을 구성해낸다.  
+
+## 순차 자료구조와 선형 리스트
