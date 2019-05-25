@@ -21,6 +21,7 @@ module.exports = {
         items: [
           { text: 'networkx', link: '/references/networkx/' },
           { text: 'd3.js', link: '/references/d3_js/' },
+          { text: 'maven', link: '/references/maven/' },
         ]
       },
       { text: 'read Book',
