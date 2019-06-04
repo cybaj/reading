@@ -29,6 +29,7 @@ module.exports = {
           { text: 'clang DS', link: '/books/c_datastructure/' },
           { text: 'js Patterns', link: '/books/js_patterns/' },
           { text: 'combinatorics', link: '/books/combinatorics/' },
+          { text: 'linux network', link: '/books/nag/' },
         ]
       }
     ]
